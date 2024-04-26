@@ -28,7 +28,7 @@ const Start = ({ navigation }) => {
           value={name}
           onChangeText={setName}
           placeholder="Type your username here"
-          placeholderTextColor="#ffffff" // Placeholder text color
+          placeholderTextColor="black"
         />
         <View style={styles.colorPicker}>
           <TouchableOpacity
@@ -67,10 +67,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    color: "#ffffff",
+    color: "#black",
     fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 20,
+    marginBottom: 210,
   },
   textInput: {
     width: "88%",
@@ -78,9 +78,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 15,
     marginBottom: 15,
-    color: "#ffffff",
-    borderColor: "#ffffff",
+    color: "black",
+    borderColor: "black",
     borderRadius: 5,
+    backgroundColor: "white",
   },
   image: {
     flex: 1,
