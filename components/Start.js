@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 
-const image = { uri: "https://legacy.reactjs.org/logo-og.png" };
+const image = require("../img/background.png");
 
 const Start = ({ navigation }) => {
   const [name, setName] = useState("");
@@ -32,28 +32,29 @@ const Start = ({ navigation }) => {
         />
         <View style={styles.colorPicker}>
           <TouchableOpacity
-            style={[styles.colorOption, { backgroundColor: "#ff6347" }]}
-            onPress={() => handleColorChange("#ff6347")}
+            style={[styles.colorOption, { backgroundColor: "darkgreen" }]}
+            onPress={() => handleColorChange("darkgreen")}
           />
           <TouchableOpacity
-            style={[styles.colorOption, { backgroundColor: "#00bfff" }]}
-            onPress={() => handleColorChange("#00bfff")}
+            style={[styles.colorOption, { backgroundColor: "darkgrey" }]}
+            onPress={() => handleColorChange("darkgrey")}
           />
           <TouchableOpacity
-            style={[styles.colorOption, { backgroundColor: "#32cd32" }]}
-            onPress={() => handleColorChange("#32cd32")}
+            style={[styles.colorOption, { backgroundColor: "darkgoldenrod" }]}
+            onPress={() => handleColorChange("darkgoldenrod")}
           />
         </View>
-        <Button
-          title="Start Chatting"
-          color="#ffffff" // White button text color
+        <TouchableOpacity
+          style={styles.button}
           onPress={() =>
             navigation.navigate("Chat", {
               name: name,
               backgroundColor: selectedColor,
             })
           }
-        />
+        >
+          <Text style={styles.buttonText}>Start Chatting</Text>
+        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    color: "#ffffff", // White text color
+    color: "#ffffff",
     fontSize: 32,
     fontWeight: "bold",
     marginBottom: 20,
@@ -77,8 +78,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginTop: 15,
     marginBottom: 15,
-    color: "#ffffff", // White text color
-    borderColor: "#ffffff", // White border color
+    color: "#ffffff",
+    borderColor: "#ffffff",
     borderRadius: 5,
   },
   image: {
@@ -95,6 +96,17 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
+  },
+  button: {
+    backgroundColor: "black",
+    padding: 15,
+    borderRadius: 5,
+    marginTop: 10,
+  },
+  buttonText: {
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 
