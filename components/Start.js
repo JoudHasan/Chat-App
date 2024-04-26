@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     color: "black",
     fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 210,
+    marginBottom: 50,
   },
   textInput: {
     width: "88%",
