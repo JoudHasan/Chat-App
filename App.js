@@ -1,9 +1,9 @@
-// App.js
-import React from "react";
+// import the screens
+import Start from "./components/Start";
+import Chat from "./components/Chat";
+
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Chat from "./components/Chat";
-import Start from "./components/Start";
 
 const Stack = createNativeStackNavigator();
 
