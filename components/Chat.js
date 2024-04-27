@@ -54,7 +54,10 @@ const Chat = ({ route, navigation }) => {
           _id: 1,
         }}
       />
-      {Platform.OS === "android" && <KeyboardAvoidingView behavior="height" />}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 64 : 0}
+      />
     </View>
   );
 };
