@@ -3,18 +3,38 @@ import {
   StyleSheet,
   View,
   Text,
-  Button,
   TextInput,
   ImageBackground,
   TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
-
+import { getAuth, signInAnonymously } from "firebase/auth";
 const image = require("../img/background.png");
 
 const Start = ({ navigation }) => {
+  const auth = getAuth();
   const [name, setName] = useState("");
-  const [selectedColor, setSelectedColor] = useState("#ffffff");
+  const [selectedColor, setSelectedColor] = useState("");
 
+  // Handle the sign-in anonymously process for the user.
+  const signInUser = () => {
+    signInAnonymously(auth)
+      .then((result) => {
+        navigation.navigate("Chat", {
+          name: name,
+          background: selectedColor,
+          userID: result.user.uid,
+        });
+        Alert.alert("Signed in Successfully!");
+      })
+      .catch((error) => {
+        Alert.alert("Unable to sign in, try again later.");
+      });
+  };
+
+  // Function to handle color change
   const handleColorChange = (color) => {
     setSelectedColor(color);
   };
@@ -44,17 +64,12 @@ const Start = ({ navigation }) => {
             onPress={() => handleColorChange("darkgoldenrod")}
           />
         </View>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            navigation.navigate("Chat", {
-              name: name,
-              backgroundColor: selectedColor,
-            })
-          }
-        >
+        <TouchableOpacity style={styles.button} onPress={signInUser}>
           <Text style={styles.buttonText}>Start Chatting</Text>
         </TouchableOpacity>
+        {Platform.OS === "android" && (
+          <KeyboardAvoidingView behavior="height" />
+        )}
       </View>
     </ImageBackground>
   );
