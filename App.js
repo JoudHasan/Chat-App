@@ -1,10 +1,11 @@
-import Start from "./components/Start";
-import Chat from "./components/Chat";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
+import Start from "./components/Start";
+import Chat from "./components/Chat";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,8 +21,8 @@ const App = () => {
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app); // Get a reference to the Firestore service
-  const storage = getStorage(app); // Initialize Firebase Storage
+  const db = getFirestore(app);
+  const storage = getStorage(app);
 
   return (
     <NavigationContainer>
