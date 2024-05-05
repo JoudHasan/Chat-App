@@ -11,7 +11,7 @@ import { getStorage } from "firebase/storage";
 import Start from "./components/Start";
 import Chat from "./components/Chat";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { LogBox, Alert } from "react-native";
+import { Alert } from "react-native";
 
 const App = () => {
   const Stack = createNativeStackNavigator();
@@ -32,6 +32,7 @@ const App = () => {
   const storage = getStorage(app);
 
   useEffect(() => {
+    console.log("Network status: ", connectionStatus.isConnected);
     if (connectionStatus.isConnected === false) {
       Alert.alert("Connection Lost!");
       disableNetwork(db);
