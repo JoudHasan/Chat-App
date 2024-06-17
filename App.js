@@ -13,10 +13,12 @@ import Chat from "./components/Chat";
 import { useNetInfo } from "@react-native-community/netinfo";
 import { Alert } from "react-native";
 
+// Main App component
 const App = () => {
   const Stack = createNativeStackNavigator();
   const connectionStatus = useNetInfo();
 
+  // Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyAEN5zRsJ6dzFFpiqRuW9RLA5VIpL8WbaQ",
     authDomain: "chat-app-26204.firebaseapp.com",
@@ -31,13 +33,14 @@ const App = () => {
   const db = getFirestore(app);
   const storage = getStorage(app);
 
+  // Monitor network status and enable/disable Firestore network accordingly
   useEffect(() => {
     console.log("Network status: ", connectionStatus.isConnected);
     if (connectionStatus.isConnected === false) {
       Alert.alert("Connection Lost!");
-      disableNetwork(db);
+      disableNetwork(db); // Disable Firestore network when offline
     } else if (connectionStatus.isConnected === true) {
-      enableNetwork(db);
+      enableNetwork(db); // Enable Firestore network when online
     }
   }, [connectionStatus.isConnected, db]);
 
