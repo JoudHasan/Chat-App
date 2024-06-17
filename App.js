@@ -45,9 +45,8 @@ const App = () => {
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Start">
         <Stack.Screen name="Start" component={Start} />
-        <Stack.Screen
-          name="Chat"
-          component={(props) => (
+        <Stack.Screen name="Chat">
+          {(props) => (
             <Chat
               isConnected={connectionStatus.isConnected}
               db={db}
@@ -55,7 +54,7 @@ const App = () => {
               {...props}
             />
           )}
-        />
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

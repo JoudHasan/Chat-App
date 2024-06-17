@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { View, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+import {
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Alert,
+} from "react-native";
 import {
   collection,
   query,
@@ -9,10 +15,14 @@ import {
 } from "firebase/firestore";
 import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import CustomActions from "./CustomActions";
+import MapView from "react-native-maps";
+import { getStorage } from "firebase/storage";
 
 const Chat = ({ route, navigation, db, isConnected }) => {
   const { name, backgroundColor, userId } = route.params;
   const [messages, setMessages] = useState([]);
+  const storage = getStorage();
 
   useEffect(() => {
     navigation.setOptions({ title: name });
@@ -59,7 +69,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
       try {
         const messageToAdd = {
           ...newMessages[0],
-          createdAt: new Date(), // Convert to Firestore timestamp if needed
+          createdAt: new Date(),
         };
         await addDoc(collection(db, "messages"), messageToAdd);
         setMessages((previousMessages) =>
@@ -69,7 +79,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
         console.error("Failed to send message: ", error);
       }
     } else {
-      // Optionally alert the user that sending messages is not possible when offline
+      Alert.alert("You're offline. Unable to send messages.");
     }
   };
 
@@ -95,6 +105,42 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     />
   );
 
+  const renderCustomActions = (props) => {
+    return <CustomActions storage={storage} {...props} />;
+  };
+
+  const renderCustomView = (props) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    } else if (currentMessage.audio) {
+      return (
+        <View style={{ padding: 10 }}>
+          <Text>Audio message</Text>
+          <TouchableOpacity onPress={() => playAudio(currentMessage.audio)}>
+            <Text>Play</Text>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return null;
+  };
+
+  const playAudio = async (audioURI) => {
+    const { sound } = await Audio.Sound.createAsync({ uri: audioURI });
+    await sound.playAsync();
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -104,10 +150,15 @@ const Chat = ({ route, navigation, db, isConnected }) => {
       <View style={[styles.container, { backgroundColor }]}>
         <GiftedChat
           messages={messages}
-          onSend={onSend}
-          user={{ _id: userId, name }}
           renderBubble={renderBubble}
           renderInputToolbar={renderInputToolbar}
+          onSend={(messages) => onSend(messages)}
+          renderActions={renderCustomActions}
+          renderCustomView={renderCustomView}
+          user={{
+            _id: userId,
+            name,
+          }}
         />
       </View>
     </KeyboardAvoidingView>
@@ -118,6 +169,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginBottom: 10,
+  },
+  locationContainer: {
+    margin: 10,
+    padding: 10,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 5,
   },
 });
 

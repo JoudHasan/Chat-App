@@ -13,9 +13,22 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "We need your permission to use the camera",
+        "NSPhotoLibraryUsageDescription": "We need your permission to access the photo library",
+        "NSLocationWhenInUseUsageDescription": "We need your permission to access your location",
+        "NSMicrophoneUsageDescription": "We need your permission to use the microphone for recording audio"
+      }
     },
     "android": {
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
