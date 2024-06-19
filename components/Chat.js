@@ -5,6 +5,8 @@ import {
   Platform,
   StyleSheet,
   Alert,
+  Text,
+  TouchableOpacity,
 } from "react-native";
 import {
   collection,
@@ -17,6 +19,7 @@ import { Bubble, GiftedChat, InputToolbar } from "react-native-gifted-chat";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomActions from "./CustomActions";
 import MapView from "react-native-maps";
+import { Audio } from "expo-av";
 import { getStorage } from "firebase/storage";
 
 // Chat component to handle chat functionalities

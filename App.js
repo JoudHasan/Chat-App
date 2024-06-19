@@ -33,16 +33,15 @@ const App = () => {
   const db = getFirestore(app);
   const storage = getStorage(app);
 
-  // Monitor network status and enable/disable Firestore network accordingly
+  // Network connectivity status
   useEffect(() => {
-    console.log("Network status: ", connectionStatus.isConnected);
     if (connectionStatus.isConnected === false) {
-      Alert.alert("Connection Lost!");
-      disableNetwork(db); // Disable Firestore network when offline
+      Alert.alert("Connection lost");
+      disableNetwork(db);
     } else if (connectionStatus.isConnected === true) {
-      enableNetwork(db); // Enable Firestore network when online
+      enableNetwork(db);
     }
-  }, [connectionStatus.isConnected, db]);
+  }, [connectionStatus.isConnected]);
 
   return (
     <NavigationContainer>
