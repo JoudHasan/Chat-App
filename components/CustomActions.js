@@ -24,6 +24,7 @@ const CustomActions = ({
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Function to upload the image and send the URL
   const uploadAndSendImage = async (imageURI) => {
     setLoading(true);
     try {
@@ -43,6 +44,7 @@ const CustomActions = ({
     }
   };
 
+  // Function to pick an image from the library
   const pickImage = async () => {
     const permissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissions.granted) {
@@ -61,6 +63,7 @@ const CustomActions = ({
     }
   };
 
+  // Function to take a photo using the camera
   const takePhoto = async () => {
     const permissions = await ImagePicker.requestCameraPermissionsAsync();
     if (permissions.granted) {
@@ -82,12 +85,14 @@ const CustomActions = ({
     }
   };
 
+  // Function to generate a unique reference string for the image
   const generateReference = (uri) => {
     const timeStamp = new Date().getTime();
     const imageName = uri.split("/").pop();
     return `${userID}-${timeStamp}-${imageName}`;
   };
 
+  // Function to get the current location
   const getLocation = async () => {
     setLoading(true);
     try {
@@ -117,6 +122,7 @@ const CustomActions = ({
 
   return (
     <View style={styles.mainContainer}>
+      {/* Button to show modal with action options */}
       <TouchableOpacity
         style={[styles.container, wrapperStyle]}
         onPress={() => setModalVisible(true)}
@@ -128,6 +134,7 @@ const CustomActions = ({
         <Ionicons name="add-circle-outline" size={24} color="white" />
       </TouchableOpacity>
 
+      {/* Modal to show action options */}
       <Modal
         animationType="slide"
         transparent={true}
@@ -142,6 +149,7 @@ const CustomActions = ({
               <ActivityIndicator size="large" color="#075E54" />
             ) : (
               <>
+                {/* Button to pick an image from the library */}
                 <TouchableOpacity
                   style={[styles.modalButton, wrapperStyle]}
                   onPress={pickImage}
@@ -150,6 +158,7 @@ const CustomActions = ({
                   <Text style={styles.buttonText}>Choose From Library</Text>
                 </TouchableOpacity>
 
+                {/* Button to take a photo using the camera */}
                 <TouchableOpacity
                   style={[styles.modalButton, wrapperStyle]}
                   onPress={takePhoto}
@@ -158,15 +167,16 @@ const CustomActions = ({
                   <Text style={styles.buttonText}>Take Picture</Text>
                 </TouchableOpacity>
 
+                {/* Button to send the current location */}
                 <TouchableOpacity
                   style={[styles.modalButton, wrapperStyle]}
-                  a
                   onPress={getLocation}
                 >
                   <Ionicons name="location-outline" size={24} color="white" />
                   <Text style={styles.buttonText}>Send Location</Text>
                 </TouchableOpacity>
 
+                {/* Button to cancel and close the modal */}
                 <TouchableOpacity
                   style={[styles.modalButton, wrapperStyle]}
                   onPress={() => setModalVisible(false)}
@@ -222,4 +232,5 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 });
+
 export default CustomActions;

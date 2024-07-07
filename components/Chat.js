@@ -27,33 +27,38 @@ const Chat = ({ route, navigation, db, isConnected }) => {
   const storage = getStorage();
 
   useEffect(() => {
+    // Set the navigation title to the name from route parameters
     navigation.setOptions({ title: name });
 
     let unsubMessages = null;
     if (isConnected) {
+      // Query to fetch messages ordered by creation time in descending order
       const q = query(collection(db, "messages"), orderBy("createdAt", "desc"));
       unsubMessages = onSnapshot(
         q,
         (documentsSnapshot) => {
+          // Map documents to message format
           const newMessages = documentsSnapshot.docs.map((doc) => ({
             _id: doc.id,
             ...doc.data(),
             createdAt: new Date(doc.data().createdAt.toMillis()),
           }));
-          cacheMessages(newMessages);
-          setMessages(newMessages);
+          cacheMessages(newMessages); // Cache the messages locally
+          setMessages(newMessages); // Update state with new messages
         },
         (error) => {
           Alert.alert("Error fetching messages", error.message);
         }
       );
     } else {
-      loadCachedMessages();
+      loadCachedMessages(); // Load cached messages when offline
     }
 
+    // Cleanup subscription on component unmount
     return () => unsubMessages && unsubMessages();
   }, [isConnected, db, navigation, name]);
 
+  // Cache messages to AsyncStorage
   const cacheMessages = async (messagesToCache) => {
     try {
       await AsyncStorage.setItem("messages", JSON.stringify(messagesToCache));
@@ -62,6 +67,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     }
   };
 
+  // Load cached messages from AsyncStorage
   const loadCachedMessages = async () => {
     try {
       const cachedMessages = (await AsyncStorage.getItem("messages")) || "[]";
@@ -71,6 +77,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     }
   };
 
+  // Handle sending new messages
   const onSend = useCallback(
     async (newMessages) => {
       if (isConnected) {
@@ -90,10 +97,12 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     [isConnected]
   );
 
+  // Render input toolbar conditionally based on connection status
   const renderInputToolbar = (props) => {
     return isConnected ? <InputToolbar {...props} /> : null;
   };
 
+  // Customize message bubble appearance
   const renderBubble = (props) => (
     <Bubble
       {...props}
@@ -104,6 +113,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     />
   );
 
+  // Render custom actions (e.g., sending images, location)
   const renderCustomActions = (props) => (
     <CustomActions
       storage={storage}
@@ -113,6 +123,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     />
   );
 
+  // Render custom view for location messages
   const renderCustomView = (props) => {
     const { currentMessage } = props;
     if (currentMessage.location) {
@@ -131,6 +142,7 @@ const Chat = ({ route, navigation, db, isConnected }) => {
     return null;
   };
 
+  // Play audio messages
   const playAudio = async (audioURI) => {
     try {
       const { sound } = await Audio.Sound.createAsync({ uri: audioURI });
