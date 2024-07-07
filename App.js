@@ -1,47 +1,53 @@
-import React, { useEffect } from "react";
+// import the screens
+import Start from "./components/Start";
+import Chat from "./components/Chat";
+
+// import react Navigation
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+
+// import functions for initializing firestore
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
   disableNetwork,
   enableNetwork,
 } from "firebase/firestore";
-import { initializeAuth, getReactNativePersistence } from "firebase/auth";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getStorage } from "firebase/storage";
 import { useNetInfo } from "@react-native-community/netinfo";
-import { Alert } from "react-native";
-import Start from "./components/Start";
-import Chat from "./components/Chat";
+import { useEffect } from "react";
+import { Alert, LogBox } from "react-native";
 
+// Create the navigator
 const Stack = createNativeStackNavigator();
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyAEN5zRsJ6dzFFpiqRuW9RLA5VIpL8WbaQ",
-  authDomain: "chat-app-26204.firebaseapp.com",
-  projectId: "chat-app-26204",
-  storageBucket: "chat-app-26204.appspot.com",
-  messagingSenderId: "321927240395",
-  appId: "1:321927240395:web:7b6b003d7a93b7f101d94e",
-};
+LogBox.ignoreLogs(["AsyncStorage has been extracted from"]);
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(AsyncStorage),
-});
-const db = getFirestore(app);
-const storage = getStorage(app);
-
-// Main App component
 const App = () => {
   const connectionStatus = useNetInfo();
 
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyAEN5zRsJ6dzFFpiqRuW9RLA5VIpL8WbaQ",
+    authDomain: "chat-app-26204.firebaseapp.com",
+    projectId: "chat-app-26204",
+    storageBucket: "chat-app-26204.appspot.com",
+    messagingSenderId: "321927240395",
+    appId: "1:321927240395:web:7b6b003d7a93b7f101d94e",
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
+  // Initialize Firestore Database handler
+  const db = getFirestore(app);
+
+  // Initialize Firebase Storage handler
+  const storage = getStorage(app);
+
   useEffect(() => {
     if (connectionStatus.isConnected === false) {
-      Alert.alert("Connection lost");
+      Alert.alert("Connection Lost!!");
       disableNetwork(db);
     } else if (connectionStatus.isConnected === true) {
       enableNetwork(db);

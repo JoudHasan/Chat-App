@@ -1,179 +1,117 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   TouchableOpacity,
   View,
-  Alert,
-  StyleSheet,
-  Modal,
   Text,
+  StyleSheet,
+  Alert,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as MediaLibrary from "expo-media-library";
 import * as Location from "expo-location";
-import { Audio } from "expo-av";
-import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Ionicons } from "@expo/vector-icons";
 
 const CustomActions = ({
   wrapperStyle,
   iconTextStyle,
   onSend,
   storage,
-  id,
+  userID,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [recordingObject, setRecordingObject] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      if (recordingObject) {
-        recordingObject.stopAndUnloadAsync();
-      }
-    };
-  }, [recordingObject]);
+  const uploadAndSendImage = async (imageURI) => {
+    setLoading(true);
+    try {
+      const uniqueRefString = generateReference(imageURI);
+      const response = await fetch(imageURI);
+      const blob = await response.blob();
+      const newUploadRef = ref(storage, uniqueRefString);
+      const snapshot = await uploadBytes(newUploadRef, blob);
+      const imageURL = await getDownloadURL(snapshot.ref);
+      onSend({ image: imageURL });
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      Alert.alert("Error uploading image:", error.message);
+    } finally {
+      setLoading(false);
+      setModalVisible(false);
+    }
+  };
 
   const pickImage = async () => {
-    setModalVisible(false);
     const permissions = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permissions.granted) {
-      Alert.alert("Permissions haven't been granted.");
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    });
-
-    if (!result.canceled) {
-      const imageURI = result.assets[0].uri;
-      console.log("Image URI:", imageURI); // Logging the image URI
-      await uploadAndSendImage(imageURI);
+    if (permissions.granted) {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      });
+      if (!result.canceled) {
+        await uploadAndSendImage(result.assets[0].uri);
+      } else {
+        Alert.alert("Image selection was canceled.");
+      }
+    } else {
+      Alert.alert(
+        "Camera roll access is required to choose images. Please enable it in settings."
+      );
     }
   };
 
   const takePhoto = async () => {
-    setModalVisible(false);
     const permissions = await ImagePicker.requestCameraPermissionsAsync();
-    if (!permissions.granted) {
-      Alert.alert("Permissions haven't been granted.");
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-    });
-
-    if (!result.canceled) {
-      const imageURI = result.assets[0].uri;
-      console.log("Photo URI:", imageURI); // Logging the photo URI
-      await uploadAndSendImage(imageURI);
-    }
-  };
-
-  const uploadAndSendImage = async (imageURI) => {
-    try {
-      const uniqueRefString = generateReference(imageURI);
-      const newUploadRef = ref(storage, uniqueRefString);
-      const response = await fetch(imageURI);
-      const blob = await response.blob();
-      console.log("Uploading image...");
-      uploadBytes(newUploadRef, blob).then(async (snapshot) => {
-        const imageURL = await getDownloadURL(snapshot.ref);
-        console.log("Image URL:", imageURL); // Logging the image URL
-        onSend({ image: imageURL });
-      });
-    } catch (error) {
-      console.error("Error uploading image:", error);
+    if (permissions.granted) {
+      const result = await ImagePicker.launchCameraAsync();
+      if (!result.canceled) {
+        const mediaLibraryPermissions =
+          await MediaLibrary.requestPermissionsAsync();
+        if (mediaLibraryPermissions.granted) {
+          await MediaLibrary.saveToLibraryAsync(result.assets[0].uri);
+        }
+        await uploadAndSendImage(result.assets[0].uri);
+      } else {
+        Alert.alert("Photo capture was canceled.");
+      }
+    } else {
+      Alert.alert(
+        "Camera access is required to take a photo. Please enable it in settings."
+      );
     }
   };
 
   const generateReference = (uri) => {
     const timeStamp = new Date().getTime();
     const imageName = uri.split("/").pop();
-    return `${id}/${timeStamp}-${imageName}`;
+    return `${userID}-${timeStamp}-${imageName}`;
   };
 
   const getLocation = async () => {
-    setModalVisible(false);
-    const permissions = await Location.requestForegroundPermissionsAsync();
-    if (!permissions.granted) {
-      Alert.alert("Permissions haven't been granted.");
-      return;
-    }
-
-    const location = await Location.getCurrentPositionAsync({});
-    if (location) {
-      onSend({
-        location: {
-          longitude: location.coords.longitude,
-          latitude: location.coords.latitude,
-        },
-      });
-    } else {
-      Alert.alert("Error occurred while fetching location");
-    }
-  };
-
-  const startRecording = async () => {
-    setModalVisible(false);
-    const permissions = await Audio.requestPermissionsAsync();
-    if (!permissions.granted) {
-      Alert.alert("Failed to get recording permissions.");
-      return;
-    }
-
+    setLoading(true);
     try {
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: true,
-        playsInSilentModeIOS: true,
-      });
-
-      const { recording } = await Audio.Recording.createAsync(
-        Audio.RecordingOptionsPresets.HIGH_QUALITY
-      );
-      setRecordingObject(recording);
-
-      Alert.alert(
-        "Recording...",
-        undefined,
-        [
-          {
-            text: "Cancel",
-            onPress: stopRecording,
-          },
-          {
-            text: "Stop and Send",
-            onPress: sendRecordedSound,
-          },
-        ],
-        { cancelable: false }
-      );
-    } catch (error) {
-      Alert.alert("Failed to start recording!");
-    }
-  };
-
-  const stopRecording = async () => {
-    if (recordingObject) {
-      await recordingObject.stopAndUnloadAsync();
-      await Audio.setAudioModeAsync({
-        allowsRecordingIOS: false,
-        playsInSilentModeIOS: false,
-      });
-    }
-  };
-
-  const sendRecordedSound = async () => {
-    if (recordingObject) {
-      await stopRecording();
-      const uri = recordingObject.getURI();
-      const uniqueRefString = generateReference(uri);
-      const newUploadRef = ref(storage, uniqueRefString);
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      uploadBytes(newUploadRef, blob).then(async (snapshot) => {
-        const soundURL = await getDownloadURL(snapshot.ref);
-        onSend({ audio: soundURL });
-      });
+      const permissions = await Location.requestForegroundPermissionsAsync();
+      if (permissions.granted) {
+        const location = await Location.getCurrentPositionAsync({});
+        if (location) {
+          onSend({
+            location: {
+              longitude: location.coords.longitude,
+              latitude: location.coords.latitude,
+            },
+          });
+        } else {
+          Alert.alert("Error occurred while fetching location");
+        }
+      } else {
+        Alert.alert(
+          "Location access is required to send your location. Please enable it in settings."
+        );
+      }
+    } finally {
+      setLoading(false);
+      setModalVisible(false);
     }
   };
 
@@ -200,45 +138,44 @@ const CustomActions = ({
       >
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <TouchableOpacity
-              style={[styles.modalButton, wrapperStyle]}
-              onPress={pickImage}
-            >
-              <Ionicons name="image-outline" size={24} color="white" />
-              <Text style={styles.buttonText}>Choose From Library</Text>
-            </TouchableOpacity>
+            {loading ? (
+              <ActivityIndicator size="large" color="#075E54" />
+            ) : (
+              <>
+                <TouchableOpacity
+                  style={[styles.modalButton, wrapperStyle]}
+                  onPress={pickImage}
+                >
+                  <Ionicons name="image-outline" size={24} color="white" />
+                  <Text style={styles.buttonText}>Choose From Library</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.modalButton, wrapperStyle]}
-              onPress={takePhoto}
-            >
-              <Ionicons name="camera-outline" size={24} color="white" />
-              <Text style={styles.buttonText}>Take Picture</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, wrapperStyle]}
+                  onPress={takePhoto}
+                >
+                  <Ionicons name="camera-outline" size={24} color="white" />
+                  <Text style={styles.buttonText}>Take Picture</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.modalButton, wrapperStyle]}
-              onPress={getLocation}
-            >
-              <Ionicons name="location-outline" size={24} color="white" />
-              <Text style={styles.buttonText}>Send Location</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, wrapperStyle]}
+                  a
+                  onPress={getLocation}
+                >
+                  <Ionicons name="location-outline" size={24} color="white" />
+                  <Text style={styles.buttonText}>Send Location</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.modalButton, wrapperStyle]}
-              onPress={startRecording}
-            >
-              <Ionicons name="mic-outline" size={24} color="white" />
-              <Text style={styles.buttonText}>Record Sound</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalButton, wrapperStyle]}
-              onPress={() => setModalVisible(false)}
-            >
-              <Ionicons name="close-outline" size={24} color="white" />
-              <Text style={styles.buttonText}>Cancel</Text>
-            </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.modalButton, wrapperStyle]}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Ionicons name="close-outline" size={24} color="white" />
+                  <Text style={styles.buttonText}>Cancel</Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </Modal>
@@ -285,5 +222,4 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
 });
-
 export default CustomActions;
