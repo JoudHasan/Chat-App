@@ -44,6 +44,7 @@ This chat app is designed for mobile devices using React Native. It provides use
    - expo-image-picker
    - expo-location
    - expo-async-storage
+   - 
 3. **Configure Firebase:**
    - Sign in at Google Firebase.
    - Create a Project (uncheck "Enable Google Analytics for this project").
@@ -75,17 +76,11 @@ This chat app is designed for mobile devices using React Native. It provides use
   - Display the user's name in the navigation bar at the top of the chat screen.
 - **Chat Screen:** Set the chat screen's background to the color chosen by the user in the start screen.
   - Add the color to navigate, similar to the user's name.
+- **Build the Chat Functionality:** Use the Gifted Chat library to create the chat interface and functionality.
+- **Authentication:** Implement anonymous user authentication using Firebase.
+- **Data Storage:** Store chat conversations in Firestore Database and locally using asyncStorage.
+- **Image and Location Sharing:** Allow users to pick images from their device's library, take pictures with their camera, and share their location.
+- **Accessibility:** Ensure the app is compatible with screen readers and follows accessibility best practices.
 
-## Testing
-- **Android Emulator:** Set up Android Emulator and use it to test functionality and UI.
-- **iOS Simulator (Optional):** Test your app on iOS Simulator if available.
-
-## Repository and Recording
-- **GitHub Repository:** Create a repository for your chat app on GitHub.
-  - Commit your app and include this README file.
-- **Recording:** Create a short recording demonstrating entering the app via the start screen and navigating to the chat screen.
-  - For Android Emulator: Follow instructions in Android Studio for recording.
-  - For iOS Simulator: Use the "Record Screen" option in the "File" menu.
-- Share the link or upload the recording file to your GitHub repository for review.
 
 Thank you for contributing to the Chat App project! If you have any questions or need assistance, feel free to reach out.
